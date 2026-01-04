@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Subnet Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="script.js" defer></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        @keyframes slideUp {
+            0% { transform: translateY(10px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        .binary-octet {
+            display: inline-block;
+            padding: 0 2px;
+            color: #3b82f6;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 text-white min-h-screen">
+    <header class="px-6 lg:px-20 py-8  bg-indigo-600 shadow-lg">
+        <div class="container mx-auto">
+            <h1 class="text-4xl lg:text-5xl font-bold text-white mb-2">Visual Subnet Calculator</h1>
+            <p class="text-lg font-mono text-blue-100">Calculate network details from IP address and CIDR notation</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 lg:px-8 py-8">
+        <section class="input-section bg-gray-800 p-6 rounded-lg shadow-lg mb-8">
+            <div class="input-group">
+                <label for="ipInput" class="block text-white text-lg font-semibold mb-3">IP Address / CIDR:</label>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <input 
+                        type="text" 
+                        id="ipInput" 
+                        placeholder="Enter IP/CIDR e.g. 192.168.1.10/24" 
+                        class="flex-1 p-4 rounded-lg bg-white text-gray-800 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition duration-300 text-lg font-mono"
+                    >
+                    <button 
+                        id="calculateBtn" 
+                        class="px-8 py-4  bg-indigo-300 text-white rounded-lg hover:bg-indigo-500 focus:ring-2 focus:ring-yellow-500 focus:outline-none transition duration-300 transform hover:scale-105 font-semibold text-lg shadow-lg"
+                    >
+                        Calculate
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-8">
+            <div id="errorMessage" class="hidden bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg shadow-md animate-fade-in">
+            </div>
+        </section>
+
+        <section class="bg-gray-800 p-6 rounded-xl shadow-xl mb-8 animate-fade-in border border-gray-700">
+            <h2 class="text-3xl font-bold text-white mb-6 border-b border-gray-600 pb-3 flex items-center">
+                 Network Information
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-gradient-to-br from-gray-700 to-gray-600 p-5 rounded-lg flex flex-col space-y-3 hover:from-gray-600 hover:to-gray-500 transition-all duration-300 transform hover:scale-102 shadow-lg">
+                    <label class="text-gray-300 text-sm font-semibold uppercase tracking-wide flex items-center">
+                        Network Address:
+                    </label>
+                    <span id="networkAddress" class="text-white text-xl font-mono bg-gray-900 p-2 rounded ">.</span>
+                </div>
+
+                <div class="bg-gradient-to-br from-gray-700 to-gray-600 p-5 rounded-lg flex flex-col space-y-3 hover:from-gray-600 hover:to-gray-500 transition-all duration-300 transform hover:scale-102 shadow-lg">
+                    <label class="text-gray-300 text-sm font-semibold uppercase tracking-wide flex items-center">
+                        Broadcast Address:
+                    </label>
+                    <span id="broadcastAddress" class="text-white text-xl font-mono bg-gray-900 p-2 rounded ">.</span>
+                </div>
+                
+                <div class="bg-gradient-to-br from-gray-700 to-gray-600 p-5 rounded-lg flex flex-col space-y-3 hover:from-gray-600 hover:to-gray-500 transition-all duration-300 transform hover:scale-102 shadow-lg">
+                    <label class="text-gray-300 text-sm font-semibold uppercase tracking-wide flex items-center">
+                        First Usable IP:
+                    </label>
+                    <span id="firstUsable" class="text-white text-xl font-mono bg-gray-900 p-2 rounded ">.</span>
+                </div>
+                
+                <div class="bg-gradient-to-br from-gray-700 to-gray-600 p-5 rounded-lg flex flex-col space-y-3 hover:from-gray-600 hover:to-gray-500 transition-all duration-300 transform hover:scale-102 shadow-lg">
+                    <label class="text-gray-300 text-sm font-semibold uppercase tracking-wide flex items-center">
+                        Last Usable IP:
+                    </label>
+                    <span id="lastUsable" class="text-white text-xl font-mono bg-gray-900 p-2 rounded ">.</span>
+                </div>
+
+                <div class="bg-gradient-to-br from-gray-700 to-gray-600 p-5 rounded-lg flex flex-col space-y-3 hover:from-gray-600 hover:to-gray-500 transition-all duration-300 transform hover:scale-102 shadow-lg">
+                    <label class="text-gray-300 text-sm font-semibold uppercase tracking-wide flex items-center">
+                        Subnet Mask:
+                    </label>
+                    <span id="subnetMask" class="text-white text-xl font-mono bg-gray-900 p-2 rounded ">.</span>
+                </div>
+
+                <div class="bg-gradient-to-br from-gray-700 to-gray-600 p-5 rounded-lg flex flex-col space-y-3 hover:from-gray-600 hover:to-gray-500 transition-all duration-300 transform hover:scale-102 shadow-lg">
+                    <label class="text-gray-300 text-sm font-semibold uppercase tracking-wide flex items-center">
+                        Total Hosts:
+                    </label>
+                    <span id="totalHosts" class="text-white text-xl font-mono bg-gray-900 p-2 rounded ">.</span>
+                </div>
+
+                <div class="bg-gradient-to-br from-gray-700 to-gray-600 p-5 rounded-lg flex flex-col space-y-3 hover:from-gray-600 hover:to-gray-500 transition-all duration-300 transform hover:scale-105 shadow-lg md:col-span-2 lg:col-span-1">
+                    <label class="text-gray-300 text-sm font-semibold uppercase tracking-wide flex items-center">
+                        Usable Hosts:
+                    </label>
+                    <span id="usableHosts" class="text-white text-xl font-mono bg-gray-900 p-2 rounded ">.</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-gray-800 p-6 rounded-xl shadow-xl mb-8 animate-fade-in border border-gray-700">
+            <h2 class="text-3xl font-bold text-white mb-6 border-b border-gray-600 pb-3 flex items-center">
+                Binary Representation
+            </h2>
+            <div class="space-y-6">
+                <div class="bg-gradient-to-r from-gray-700 to-gray-600 p-6 rounded-lg flex flex-col lg:flex-row lg:items-center lg:space-x-6 hover:from-gray-600 hover:to-gray-500 transition-all duration-300 shadow-lg">
+                    <label class="text-gray-300 text-lg font-semibold uppercase tracking-wide lg:w-40 flex-shrink-0 mb-3 lg:mb-0">
+                        IP Address:
+                    </label>
+                    <div id="ipBinary" class="text-white font-mono text-lg bg-gray-900 p-4 rounded border-2 border-blue-500 flex-1 overflow-x-auto">-</div>
+                </div>
+
+                <div class="bg-gradient-to-r from-gray-700 to-gray-600 p-6 rounded-lg flex flex-col lg:flex-row lg:items-center lg:space-x-6 hover:from-gray-600 hover:to-gray-500 transition-all duration-300 shadow-lg">
+                    <label class="text-gray-300 text-lg font-semibold uppercase tracking-wide lg:w-40 flex-shrink-0 mb-3 lg:mb-0">
+                        Subnet Mask:
+                    </label>
+                    <div id="maskBinary" class="text-white font-mono text-lg bg-gray-900 p-4 rounded border-2 border-yellow-500 flex-1 overflow-x-auto">-</div>
+                </div>
+
+                <div class="bg-gradient-to-r from-gray-700 to-gray-600 p-6 rounded-lg flex flex-col lg:flex-row lg:items-center lg:space-x-6 hover:from-gray-600 hover:to-gray-500 transition-all duration-300 shadow-lg">
+                    <label class="text-gray-300 text-lg font-semibold uppercase tracking-wide lg:w-40 flex-shrink-0 mb-3 lg:mb-0">
+                        Network:
+                    </label>
+                    <div id="networkBinary" class="text-white font-mono text-lg bg-gray-900 p-4 rounded border-2 border-green-500 flex-1 overflow-x-auto">-</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-gray-800 p-6 rounded-xl shadow-xl mb-8 animate-fade-in border border-gray-700">
+            <h2 class="text-3xl font-bold text-white mb-6 border-b border-gray-600 pb-3 flex items-center">
+                Network Range Visualization
+            </h2>
+            <div class="space-y-6">
+                <div class="bg-gray-900 p-6 rounded-lg">
+                    <div class="flex h-16 bg-gray-700 rounded-lg overflow-hidden shadow-inner border-2 border-gray-600">
+                        <div id="networkPortion" class="bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-700 flex items-center justify-center text-white text-sm font-bold shadow-lg" style="width: 0%;">
+                        </div>
+                        <div id="hostPortion" class="bg-gradient-to-r from-red-500 to-red-600 transition-all duration-700 flex items-center justify-center text-white text-sm font-bold shadow-lg" style="width: 0%;">
+                        </div>
+                    </div>
+                    <div class="flex justify-between mt-4 text-lg font-semibold">
+                        <span class="network-label text-blue-400 flex items-center">
+                            Network Portion (0 bits)
+                        </span>
+                        <span class="host-label text-red-400 flex items-center">
+                            Host Portion (0 bits)
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <h3 class="text-xl font-bold text-white mb-3">Quick Reference</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div class="bg-gray-600 p-3 rounded">
+                            <span class="text-blue-400 font-semibold">Network bits:</span>
+                            <a href="https://www.geeksforgeeks.org/computer-networks/introduction-to-subnetting/" target="_blank" class="bg-green-600 hover:bg-green-700 p-3 rounded-lg transition-colors duration-200 flex items-center space-x-2">
+                                <span class="text-white"> GFG - Subnetting</span>
+                            </a>
+                        </div>
+                        <div class="bg-gray-600 p-3 rounded">
+                            <span class="text-red-400 font-semibold">Host bits:</span>
+                            <a href="https://www.geeksforgeeks.org/classless-inter-domain-routing-cidr/" target="_blank" class="bg-green-600 hover:bg-green-700 p-3 rounded-lg transition-colors duration-200 flex items-center space-x-2">
+                                <span class="text-white"> GFG - CIDR Explained</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-900 border-t border-gray-700 py-8 mt-12">
+        <div class="container mx-auto px-4 lg:px-8">
+            <div class="text-center">
+                <h3 class="text-2xl font-bold text-white mb-4">Visual Subnet Calculator</h3>
+                <p class="text-gray-400 mb-4">A comprehensive tool for network administrators and students</p>
+                <div class="flex justify-center space-x-6 text-sm text-gray-500">
+                    <span>Real-time calculations</span>
+                    <span>Visual representations</span>
+                    <span>Responsive design</span>
+                </div>
+                <div class="mt-6 pt-4 border-t border-gray-700">
+                    <p class="text-gray-500 text-sm">
+                        Made by HarshalBhogawade   
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Additional Enhancement: Loading Animation -->
+    <div id="loadingAnimation" class="hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg shadow-xl">
+            <div class="flex items-center space-x-3">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                <span class="text-gray-700 font-semibold">Calculating...</span>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+
+
+</html>
